@@ -1,137 +1,49 @@
-import requests
-from bs4 import BeautifulSoup
+from flask import Flask, render_template, request, jsonify
+app = Flask(__name__)
 
-url = 'https://movie.naver.com/movie/bi/mi/basic.naver?code=194196'
+from pymongo import MongoClient
+client = MongoClient('mongodb+srv://test:sparta@cluster0.sqrsm.mongodb.net/Cluster0?retryWrites=true&w=majority')
+db = client.dbsparta
 
-headers = {'User-Agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'}
-data = requests.get(url,headers=headers)
+@app.route('/')
+def home():
+    return render_template('index.html')
 
-soup = BeautifulSoup(data.text, 'html.parser')
+@app.route("/bucket", methods=["POST"])
+def bucket_post():
+    bucket_receive = request.form['bucket_give']
 
-title = soup.select_one('meta[property="og:title"]')['content']
-image = soup.select_one('meta[property="og:image"]')['content']
-desc = soup.select_one('meta[property="og:description"]')['content']
-comment = soup.select_one('span.st_off').text
+    bucket_list = list(db.bucket.find({}, {'_id': False}))
+    count = len(bucket_list) + 1
 
-print(title,image,desc,comment)
+    doc = {
+        'num':count,
+        'bucket': bucket_receive,
+        'done':0
+    }
 
-url = 'https://movie.naver.com/movie/bi/mi/basic.naver?code=191634'
+    db.bucket.insert_one(doc)
 
-headers = {'User-Agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'}
-data = requests.get(url,headers=headers)
+    return jsonify({'msg': '등록 완료!'})
 
-soup = BeautifulSoup(data.text, 'html.parser')
+@app.route("/bucket/done", methods=["POST"])
+def bucket_done():
+    num_receive = request.form['num_give']
+    db.bucket.update_one({'num': int(num_receive)}, {'$set': {'done': 1}})
+    return jsonify({'msg': '버킷 완료!'})
 
-title = soup.select_one('meta[property="og:title"]')['content']
-image = soup.select_one('meta[property="og:image"]')['content']
-desc = soup.select_one('meta[property="og:description"]')['content']
-comment = soup.select_one('span.st_off').text
+@app.route("/bucket/back", methods=["POST"])
+def bucket_back():
+    num_receive = request.form['num_give']
+    db.bucket.update_one({'num': int(num_receive)}, {'$set': {'done': 0}})
+    return jsonify({'result': '버킷 완료 취소!'})
 
-
-print(title,image,desc,comment)
-
-url = 'https://movie.naver.com/movie/bi/mi/basic.naver?code=81888'
-
-headers = {'User-Agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'}
-data = requests.get(url,headers=headers)
-
-soup = BeautifulSoup(data.text, 'html.parser')
-
-title = soup.select_one('meta[property="og:title"]')['content']
-image = soup.select_one('meta[property="og:image"]')['content']
-desc = soup.select_one('meta[property="og:description"]')['content']
-comment = soup.select_one('span.st_off').text
-
-
-print(title,image,desc,comment)
-
-url = 'https://movie.naver.com/movie/bi/mi/basic.naver?code=192151'
-
-headers = {'User-Agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'}
-data = requests.get(url,headers=headers)
-
-soup = BeautifulSoup(data.text, 'html.parser')
-
-title = soup.select_one('meta[property="og:title"]')['content']
-image = soup.select_one('meta[property="og:image"]')['content']
-desc = soup.select_one('meta[property="og:description"]')['content']
-comment = soup.select_one('span.st_off').text
-
-print(title,image,desc,comment)
-
-url = 'https://movie.naver.com/movie/bi/mi/basic.naver?code=213481'
-
-headers = {'User-Agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'}
-data = requests.get(url,headers=headers)
-
-soup = BeautifulSoup(data.text, 'html.parser')
-
-title = soup.select_one('meta[property="og:title"]')['content']
-image = soup.select_one('meta[property="og:image"]')['content']
-desc = soup.select_one('meta[property="og:description"]')['content']
-comment = soup.select_one('span.st_off').text
+@app.route("/bucket", methods=["GET"])
+def bucket_get():
+    bucket_list = list(db.bucket.find({}, {'_id': False}))
 
 
-print(title,image,desc,comment)
+    return jsonify({'buckets': bucket_list})
 
-url = 'https://movie.naver.com/movie/bi/mi/basic.naver?code=198413'
-
-headers = {'User-Agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'}
-data = requests.get(url,headers=headers)
-
-soup = BeautifulSoup(data.text, 'html.parser')
-
-title = soup.select_one('meta[property="og:title"]')['content']
-image = soup.select_one('meta[property="og:image"]')['content']
-desc = soup.select_one('meta[property="og:description"]')['content']
-comment = soup.select_one('span.st_off').text
-
-
-print(title,image,desc,comment)
-
-url = 'https://movie.naver.com/movie/bi/mi/basic.naver?code=217719'
-
-headers = {'User-Agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'}
-data = requests.get(url,headers=headers)
-
-soup = BeautifulSoup(data.text, 'html.parser')
-
-title = soup.select_one('meta[property="og:title"]')['content']
-image = soup.select_one('meta[property="og:image"]')['content']
-desc = soup.select_one('meta[property="og:description"]')['content']
-comment = soup.select_one('span.st_off').text
-
-
-print(title,image,desc,comment)
-
-
-url = 'https://movie.naver.com/movie/bi/mi/basic.naver?code=187347'
-
-headers = {'User-Agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'}
-data = requests.get(url,headers=headers)
-
-soup = BeautifulSoup(data.text, 'html.parser')
-
-title = soup.select_one('meta[property="og:title"]')['content']
-image = soup.select_one('meta[property="og:image"]')['content']
-desc = soup.select_one('meta[property="og:description"]')['content']
-comment = soup.select_one('span.st_off').text
-
-
-print(title,image,desc,comment)
-
-
-url = 'https://movie.naver.com/movie/bi/mi/basic.naver?code=184519'
-
-headers = {'User-Agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'}
-data = requests.get(url,headers=headers)
-
-soup = BeautifulSoup(data.text, 'html.parser')
-
-title = soup.select_one('meta[property="og:title"]')['content']
-image = soup.select_one('meta[property="og:image"]')['content']
-desc = soup.select_one('meta[property="og:description"]')['content']
-comment = soup.select_one('span.st_off').text
-
-
-print(title,image,desc,comment)
+if __name__ == '__main__':
+    app.run('0.0.0.0', port=5000, debug=True)
